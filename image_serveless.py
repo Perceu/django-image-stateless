@@ -1,5 +1,8 @@
 import os
 import sys
+from io import BytesIO
+from PIL import Image
+
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
 
@@ -28,12 +31,20 @@ class ImageForm(forms.Form):
     height = forms.IntegerField(min_value=1, max_value=2000)
     width = forms.IntegerField(min_value=1, max_value=2000)
 
+    def generate(self, image_format='png'):
+        height = self.cleaned_data['height']
+        width = self.cleaned_data['width']
+        image = Image.new('RGB', (height,width))
+        content = BytesIO()
+        image.save(content, image_format)
+        content.seek(0)
+        return content
+
 def image_render(request, height, width):
     form = ImageForm(dict(width = width, height = height))
     if form.is_valid():
-        height = form.cleaned_data['height']
-        width = form.cleaned_data['width']
-        return HttpResponse('Dimenções da imagem = {}x{}'.format(height, width))
+        image = form.generate()
+        return HttpResponse(image, content_type='image/png')
     else:
         return HttpResponse('As dimenções não são validas')
 
