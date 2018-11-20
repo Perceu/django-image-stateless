@@ -34,7 +34,7 @@ class ImageForm(forms.Form):
     def generate(self, image_format='png'):
         height = self.cleaned_data['height']
         width = self.cleaned_data['width']
-        image = Image.new('RGB', (height,width))
+        image = Image.new('RGB', (width,height))
         content = BytesIO()
         image.save(content, image_format)
         content.seek(0)
